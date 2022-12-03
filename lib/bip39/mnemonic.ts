@@ -6,7 +6,6 @@ import { pbkdf2 } from 'lib/crypto/pbkdf2';
 import { sha256 } from 'lib/crypto/sha256';
 import {
   INVALID_ENTROPY,
-  Bip39Error,
   INCORRECT_MNEMONIC
 } from './errors';
 import { utils } from 'aes-js';
@@ -15,13 +14,13 @@ import { utils } from 'aes-js';
 export class MnemonicController {
 
   async generateMnemonic(strength = 128) {
-    assert(Boolean(strength % 32 === 0), INVALID_ENTROPY, Bip39Error);
+    assert(Boolean(strength % 32 === 0), INVALID_ENTROPY);
 
     return await this.entropyToMnemonic(randomBytes(strength / 8));
   }
 
   getPath(index: number) {
-    return `m/44'/632'/0'/0'/${index}'`;
+    return `m/44'/607'/0'/0'/${index}'`;
   }
 
   async mnemonicToSeed(mnemonic: string, password?: string) {
@@ -34,13 +33,13 @@ export class MnemonicController {
   mnemonicToEntropy(mnemonic: string) {
     const words = this.#normalize(mnemonic).split(' ');
 
-    assert(words.length >= 12, INCORRECT_MNEMONIC, Bip39Error);
-    assert(words.length % 3 === 0, INCORRECT_MNEMONIC, Bip39Error);
+    assert(words.length >= 12, INCORRECT_MNEMONIC);
+    assert(words.length % 3 === 0, INCORRECT_MNEMONIC);
     // convert word indices to 11 bit binary strings
     const bits = words.map((word) => {
       const index = WORD_LIST.indexOf(word);
 
-      assert(index !== -1, INCORRECT_MNEMONIC, Bip39Error);
+      assert(index !== -1, INCORRECT_MNEMONIC);
 
       return this.#lpad(index.toString(2), '0', 11);
     }).join('');
@@ -52,9 +51,9 @@ export class MnemonicController {
     const entropyBytes = (entropyBits.match(/(.{1,8})/g) || [])
       .map(this.#binaryToByte);
 
-    assert(entropyBytes.length >= 16, INVALID_ENTROPY, Bip39Error);
-    assert(entropyBytes.length <= 32, INVALID_ENTROPY, Bip39Error);
-    assert(entropyBytes.length % 4 === 0, INVALID_ENTROPY, Bip39Error);
+    assert(entropyBytes.length >= 16, INVALID_ENTROPY);
+    assert(entropyBytes.length <= 32, INVALID_ENTROPY);
+    assert(entropyBytes.length % 4 === 0, INVALID_ENTROPY);
 
     return new Uint8Array(entropyBytes);
   }
@@ -71,16 +70,16 @@ export class MnemonicController {
   async entropyToMnemonic(entropy: Uint8Array, wordlist = WORD_LIST) {
 
     // 128 <= ENT <= 256
-    assert(entropy.length >= 16, INVALID_ENTROPY, Bip39Error);
-    assert(entropy.length <= 32, INVALID_ENTROPY, Bip39Error);
-    assert(entropy.length % 4 === 0, INVALID_ENTROPY, Bip39Error);
+    assert(entropy.length >= 16, INVALID_ENTROPY);
+    assert(entropy.length <= 32, INVALID_ENTROPY);
+    assert(entropy.length % 4 === 0, INVALID_ENTROPY);
 
     const entropyBits = this.#bytesToBinary(entropy);
     const checksumBits = await this.#deriveChecksumBits(entropy);
     const bits = entropyBits + checksumBits;
     const chunks = bits.match(/(.{1,11})/g) || [];
 
-    assert(Boolean(chunks) || chunks.length === 0, INVALID_ENTROPY, Bip39Error);
+    assert(Boolean(chunks) || chunks.length === 0, INVALID_ENTROPY);
 
     const words = chunks.map((binary) => {
         const index = this.#binaryToByte(binary);
