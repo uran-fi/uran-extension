@@ -1,0 +1,7 @@
+{
+  "name": "uran-extension",
+  "version": "0.0.1",
+  "main": "index.js",
+  "repository": "git@github.com:uran-fi/uran-extension.git",
+  "author": "Hicaru <hicc0rus@gmail.com>"
+}
