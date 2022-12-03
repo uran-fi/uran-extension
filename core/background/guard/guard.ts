@@ -1,5 +1,6 @@
-import { toByteArray, fromByteArray } from 'base64-js';
 import { utils } from 'aes-js';
+
+import { bytesToBase64, base64ToBytes } from 'lib/base64';
 import { sha256 } from 'lib/crypto/sha256';
 
 import {
@@ -91,7 +92,7 @@ export class Guard {
     ) as StorageKeyValue;
 
     if (data && data[Fields.VAULT]) {
-      this.#encryptMnemonic = toByteArray(data[Fields.VAULT]);
+      this.#encryptMnemonic = base64ToBytes(data[Fields.VAULT]);
       this.#isReady = Boolean(this.#encryptMnemonic);
     }
 
@@ -204,7 +205,7 @@ export class Guard {
     this.#hash.set(this, hash);
 
     await BrowserStorage.set(
-      buildObject(Fields.VAULT, fromByteArray(this.#encryptMnemonic))
+      buildObject(Fields.VAULT, bytesToBase64(this.#encryptMnemonic))
     );
   }
 
@@ -214,12 +215,12 @@ export class Guard {
     const hash = this.#hash.get(this) as Uint8Array;
     const encrypted = Cipher.encrypt(privKey, hash);
 
-    return fromByteArray(encrypted);
+    return bytesToBase64(encrypted);
   }
 
   decryptPrivateKey(content: string) {
     const hash = this.#hash.get(this) as Uint8Array;
-    const bytes = Cipher.decrypt(toByteArray(content), hash);
+    const bytes = Cipher.decrypt(base64ToBytes(content), hash);
 
     isPrivateKey(bytes);
 
