@@ -20,7 +20,7 @@ export class MnemonicController {
   }
 
   getPath(index: number) {
-    return `m/44'/607'/0'/0'/${index}'`;
+    return `m/44'/607'/0'/0/${index}`;
   }
 
   async mnemonicToSeed(mnemonic: string, password?: string) {
